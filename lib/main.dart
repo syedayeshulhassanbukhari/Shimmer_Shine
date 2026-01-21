@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'screens/shimmer_screen.dart';
 
+/// Entry point of the Flutter application
+/// Initializes and runs the MyApp widget
 void main() {
   runApp(const MyApp());
 }
 
+/// Root widget of the application
+/// Manages theme mode (light/dark) and provides MaterialApp configuration
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -13,8 +17,10 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  /// Current theme mode, defaults to system preference
   ThemeMode _themeMode = ThemeMode.system;
 
+  /// Toggles between light and dark theme modes
   void _toggleTheme() {
     setState(() {
       _themeMode = _themeMode == ThemeMode.light
@@ -29,6 +35,8 @@ class _MyAppState extends State<MyApp> {
       title: 'Flutter Shimmer Loading',
       debugShowCheckedModeBanner: false,
       themeMode: _themeMode,
+
+      // Configure theme settings for light and dark modes
 
       // Light theme with pure white background
       theme: ThemeData(
@@ -57,7 +65,10 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
+/// Home page widget that demonstrates shimmer loading effect
+/// Shows shimmer screen initially, then transitions to actual content
 class MyHomePage extends StatefulWidget {
+  /// Callback function to toggle theme mode
   final VoidCallback onToggleTheme;
 
   const MyHomePage({super.key, required this.onToggleTheme});
@@ -67,12 +78,14 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  /// Flag to control shimmer visibility
+  /// When true, shows shimmer loading screen; when false, shows actual content
   bool _showShimmer = true;
 
   @override
   void initState() {
     super.initState();
-    // Simulate loading - show shimmer for 5 seconds then show actual content
+    // Simulate data loading - show shimmer for 5 seconds then transition to actual content
     Future.delayed(const Duration(seconds: 5), () {
       if (mounted) {
         setState(() {
@@ -84,8 +97,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Detect current theme brightness
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    // Conditionally render shimmer screen or actual content
     return _showShimmer
         ? const ShimmerScreen()
         : Scaffold(
@@ -104,18 +119,23 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  // Success indicator icon
                   const Icon(Icons.check_circle, size: 80, color: Colors.green),
                   const SizedBox(height: 24),
+                  // Content loaded message
                   Text(
                     'Content Loaded!',
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                   const SizedBox(height: 16),
+                  // Button to restart shimmer loading demo
                   ElevatedButton.icon(
                     onPressed: () {
+                      // Reset to shimmer state
                       setState(() {
                         _showShimmer = true;
                       });
+                      // Simulate loading delay before showing content again
                       Future.delayed(const Duration(seconds: 5), () {
                         if (mounted) {
                           setState(() {

@@ -21,16 +21,20 @@ class _ShimmerEffectState extends State<ShimmerEffect>
   void initState() {
     super.initState();
 
+    // Initialize animation controller for shimmer effect
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     );
 
+    // Define animation range: gradient moves from -2x to +2x width
     _animation = Tween<double>(
-      begin: -2,
-      end: 2,
+      begin: -2, // Start position (off-screen left)
+      end:
+          2, // End position (off-screen right)    // End position (off-screen right)
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
+    // Continuously repeat the shimmer animation
     _controller.repeat();
   }
 
@@ -45,12 +49,16 @@ class _ShimmerEffectState extends State<ShimmerEffect>
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
+        // Apply gradient shader over the child widget
         return ShaderMask(
+          // Blend mode to show gradient effect on top of content
           blendMode: BlendMode.srcATop,
           shaderCallback: (bounds) {
+            // Create moving gradient for shimmer effect
             return LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
+              // Define gradient color stops (base -> highlight -> base)
               stops: const [0.0, 0.5, 1.0],
               colors: widget.isDark
                   ? [
@@ -63,6 +71,7 @@ class _ShimmerEffectState extends State<ShimmerEffect>
                       const Color(0xFFF5F5F5), // Almost white shimmer
                       const Color(0xFFE0E0E0), // Light grey base
                     ],
+              // Apply transform to animate gradient position
               transform: _SlidingGradientTransform(
                 slidePercent: _animation.value,
               ),
@@ -84,6 +93,7 @@ class _SlidingGradientTransform extends GradientTransform {
 
   @override
   Matrix4 transform(Rect bounds, {TextDirection? textDirection}) {
+    // Translate gradient horizontally based on animation value
     return Matrix4.translationValues(bounds.width * slidePercent, 0.0, 0.0);
   }
 }

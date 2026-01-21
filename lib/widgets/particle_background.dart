@@ -2,15 +2,16 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 /// Represents a single particle with its properties
+/// Each particle has position, movement speed, size, and visual properties
 class Particle {
-  double x;
-  double y;
-  final double speed;
-  final double size;
-  final double opacity;
-  final bool isHighlighted;
-  final double xOffset;
-  final double xSpeed;
+  double x; // Horizontal position (0.0 to 1.0, normalized)
+  double y; // Vertical position (0.0 to 1.0, normalized)
+  final double speed; // Downward movement speed
+  final double size; // Particle radius in pixels  // Particle radius in pixels
+  final double opacity; // Transparency level (0.0 to 1.0)
+  final bool isHighlighted; // Whether particle has glow effect
+  final double xOffset; // Horizontal oscillation offset
+  final double xSpeed; // Horizontal movement speed
 
   Particle({
     required this.x,
@@ -51,7 +52,7 @@ class _ParticleBackgroundState extends State<ParticleBackground>
     super.initState();
     _initializeParticles();
 
-    // Animation runs continuously at 60fps
+    // Setup animation controller to update particles at ~60fps for smooth motion
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 16), // ~60fps
@@ -62,13 +63,14 @@ class _ParticleBackgroundState extends State<ParticleBackground>
 
   void _initializeParticles() {
     _particles = List.generate(widget.particleCount, (index) {
-      // 20% chance for highlighted particles
+      // Randomly determine if particle should be highlighted (20% probability)
+      // Highlighted particles are larger, more opaque, and have a glow effect
       final isHighlighted = _random.nextDouble() < 0.2;
 
       return Particle(
-        x: _random.nextDouble(),
-        y: _random.nextDouble(),
-        speed: _random.nextDouble() * 0.0008 + 0.0002, // Slower speed
+        x: _random.nextDouble(), // Random horizontal position
+        y: _random.nextDouble(), // Random vertical position
+        speed: _random.nextDouble() * 0.0008 + 0.0002, // Random downward speed
         size: isHighlighted
             ? _random.nextDouble() * 3 +
                   2 // Larger size for highlighted
@@ -76,11 +78,12 @@ class _ParticleBackgroundState extends State<ParticleBackground>
         opacity: isHighlighted
             ? _random.nextDouble() * 0.4 +
                   0.5 // Higher opacity (0.5-0.9)
-            : _random.nextDouble() * 0.2 + 0.1, // Lower opacity (0.1-0.3)
+            : _random.nextDouble() * 0.2 + 0.1, // More transparent (0.1-0.3)
         isHighlighted: isHighlighted,
+        // Random horizontal oscillation offset for varied motion
         xOffset: _random.nextDouble() * 0.1 - 0.05, // Range: -0.05 to 0.05
-        xSpeed:
-            _random.nextDouble() * 0.0003 + 0.0001, // Slow horizontal movement
+        // Slow random horizontal movement speed
+        xSpeed: _random.nextDouble() * 0.0003 + 0.0001,
       );
     });
   }
@@ -88,19 +91,19 @@ class _ParticleBackgroundState extends State<ParticleBackground>
   void _updateParticles() {
     setState(() {
       for (var particle in _particles) {
-        // Move particle down
+        // Update vertical position (falling downward)
         particle.y += particle.speed;
 
-        // Random X-axis movement (oscillating)
+        // Create wave-like horizontal movement using sine function
         particle.x += sin(particle.y * 10) * particle.xSpeed;
 
-        // Reset particle when it goes off screen
+        // When particle falls below screen, reset it to top with random position
         if (particle.y > 1.0) {
-          particle.y = -0.05;
-          particle.x = _random.nextDouble();
+          particle.y = -0.05; // Reset above screen
+          particle.x = _random.nextDouble(); // New random horizontal position
         }
 
-        // Keep particle within horizontal bounds
+        // Wrap particles that move off screen horizontally
         if (particle.x < 0) particle.x = 1.0;
         if (particle.x > 1.0) particle.x = 0.0;
       }
@@ -115,6 +118,7 @@ class _ParticleBackgroundState extends State<ParticleBackground>
 
   @override
   Widget build(BuildContext context) {
+    // RepaintBoundary optimizes rendering by isolating repaints to this widget
     return RepaintBoundary(
       child: CustomPaint(
         painter: ParticlePainter(particles: _particles, isDark: widget.isDark),
@@ -133,36 +137,42 @@ class ParticlePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    // Draw each particle on the canvas
     for (var particle in particles) {
+      // Configure paint for particle color and opacity
       final paint = Paint()
         ..color = (isDark ? Colors.white : Colors.black).withOpacity(
           particle.opacity,
         )
         ..style = PaintingStyle.fill;
-
+      // Convert normalized position (0-1) to actual screen coordinates
       final position = Offset(
-        particle.x * size.width,
-        particle.y * size.height,
+        particle.x * size.width, // Scale to widget width
+        particle.y * size.height, // Scale to widget height
       );
 
-      // Draw glow effect for highlighted particles
+      // Add glow/blur effect for highlighted particles to create depth
       if (particle.isHighlighted) {
+        // Configure paint with blur filter for glow effect
         final glowPaint = Paint()
           ..color = (isDark ? Colors.white : Colors.black).withOpacity(
-            particle.opacity * 0.3,
+            particle.opacity * 0.3, // Reduced opacity for subtle glow
           )
+          // Apply Gaussian blur for glow effect
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
 
+        // Draw larger circle with blur for glow effect
         canvas.drawCircle(position, particle.size * 1.5, glowPaint);
       }
 
-      // Draw the particle
+      // Draw the actual particle circle
       canvas.drawCircle(position, particle.size, paint);
     }
   }
 
   @override
   bool shouldRepaint(ParticlePainter oldDelegate) {
-    return true; // Always repaint for animation
+    // Always return true to repaint every frame for smooth animation
+    return true;
   }
 }

@@ -9,7 +9,7 @@ class ShimmerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Automatically detect theme
+    // Automatically detect current theme to adjust colors accordingly
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final backgroundColor = isDark
         ? const Color(0xFF000000)
@@ -19,23 +19,27 @@ class ShimmerScreen extends StatelessWidget {
       backgroundColor: backgroundColor,
       body: Stack(
         children: [
-          // Particle background layer
+          // Background layer: Animated particles for visual interest
           Positioned.fill(
             child: ParticleBackground(isDark: isDark, particleCount: 50),
           ),
 
-          // Skeleton shimmer content layer using Skeletonizer
+          // Foreground layer: Skeleton UI with shimmer animation
           SafeArea(
             child: Skeletonizer(
-              enabled: true,
-              enableSwitchAnimation: true,
+              enabled: true, // Enable skeleton effect
+              enableSwitchAnimation: true, // Smooth transition when toggling
+              // Customize shimmer colors based on theme
               effect: ShimmerEffect(
+                // Base color: darker in dark mode, lighter in light mode
                 baseColor: isDark
                     ? const Color(0xFF1A1A1A) // Very dark grey for dark theme
                     : const Color(0xFFE0E0E0), // Light grey for light theme
+                // Highlight color: creates the moving shimmer effect
                 highlightColor: isDark
                     ? const Color(0xFF3A3A3A) // Medium grey for dark theme
                     : const Color(0xFFF5F5F5), // White for light theme
+                // Animation duration for one complete shimmer cycle
                 duration: const Duration(milliseconds: 1500),
               ),
               child: _buildSkeletonContent(context),
@@ -49,6 +53,7 @@ class ShimmerScreen extends StatelessWidget {
   /// Builds the skeleton loading UI with real widget structure
   Widget _buildSkeletonContent(BuildContext context) {
     return SingleChildScrollView(
+      // Disable scrolling since this is just a loading placeholder
       physics: const NeverScrollableScrollPhysics(),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
