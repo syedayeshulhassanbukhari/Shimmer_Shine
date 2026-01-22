@@ -442,6 +442,5 @@ For support, open an issue on [GitHub Issues](https://github.com/yourusername/sh
 
 **⭐ If this project helped you, please consider giving it a star!**
 
-Made with ❤️ by [Your Name]
 
 </div>
